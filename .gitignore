@@ -1,0 +1,35 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Виртуальное окружение
+venv/
+env/
+.venv/
+
+# Логи и временные файлы
+*.log
+*.tmp
+*.temp
+
+# Файлы настроек IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Файлы настроек ОС
+.DS_Store
+Thumbs.db
+
+# Файлы сессий браузера / кэши тестов (если есть)
+selenium-debug.log
+*.cache
+
+# Файлы отчётов тестов (если генерируются)
+reports/
+htmlcov/
+
+# Конфигурационные файлы, содержащие секреты (если есть)
+.env
