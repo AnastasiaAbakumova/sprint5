@@ -1,36 +1,26 @@
-import time
-from selenium import webdriver
-from selenium.webdriver.common.by import By
+import pytest
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from locators.tab_locators import TabLocators
 
-driver = webdriver.Chrome()
-wait = WebDriverWait(driver, 10)
+class TestTabsNavigation:
 
-try:
-    driver.get("https://stellarburgers.nomoreparties.site")
+    @pytest.fixture(autouse=True)
+    def open_main(self, driver, config):
+        """Открываем главную страницу перед тестами."""
+        driver.get(config['base_url'])
 
-    tabs = ["Булки", "Соусы", "Начинки"]
+    def test_tabs_switching(self, driver):
+        wait = WebDriverWait(driver, 10)
+        tabs = [TabLocators.BUNS, TabLocators.SAUCES, TabLocators.FILLINGS]
 
-    for tab_name in tabs:
-        tab = wait.until(EC.presence_of_element_located(
-            (By.XPATH, f"//div[contains(@class, 'tab_tab__1SPyG')]//span[text()='{tab_name}']/parent::div")))
+        for tab_locator, active_locator in tabs:
+            # Кликаем по табу
+            tab = wait.until(EC.presence_of_element_located(tab_locator))
+            driver.execute_script("arguments[0].scrollIntoView(true);", tab)
+            wait.until(EC.element_to_be_clickable(tab_locator))
+            driver.execute_script("arguments[0].click();", tab)
 
-        driver.execute_script("arguments[0].scrollIntoView(true);", tab)
-        wait.until(EC.element_to_be_clickable(
-            (By.XPATH, f"//div[contains(@class, 'tab_tab__1SPyG')]//span[text()='{tab_name}']/parent::div")))
-
-        driver.execute_script("arguments[0].click();", tab)
-
-        # Ждем появления активной вкладки
-        active_tab = wait.until(EC.presence_of_element_located(
-            (By.XPATH, f"//div[contains(@class, 'tab_tab_type_current__2BEPc')]//span[text()='{tab_name}']/parent::div")))
-
-        print(f"Активная вкладка сейчас: {tab_name}")
-
-        time.sleep(2)  # пауза 2 секунды чтобы визуально увидеть переключение
-
-    print("Тест пройден: переходы между вкладками работают корректно.")
-
-finally:
-    driver.quit()
+            # Проверяем, что таб активировался
+            active = wait.until(EC.presence_of_element_located(active_locator))
+            assert active.is_displayed(), f"Таб {active_locator} не активен после клика"
