@@ -1,55 +1,60 @@
 import pytest
 from selenium.webdriver.common.by import By
-import time
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
+class TestLogin:
 
-def perform_login(driver, config):
-    """
-    Хелпер для логина: вводит логин/пароль и нажимает кнопку.
-    Предполагает, что уже открыта страница логина.
-    """
-    driver.find_element(By.CSS_SELECTOR, 'input[name="name"]').send_keys(config["username"])
-    driver.find_element(By.CSS_SELECTOR, 'input[type="password"]').send_keys(config["password"])
-    driver.find_element(By.XPATH, "//button[text()='Войти']").click()
-    
+    def perform_login(self, driver, config):
+        driver.find_element(By.CSS_SELECTOR, 'input[name="name"]').send_keys(config["username"])
+        driver.find_element(By.CSS_SELECTOR, 'input[type="password"]').send_keys(config["password"])
+        driver.find_element(By.XPATH, "//button[text()='Войти']").click()
 
-def test_login_mainpage(driver, config):
-    driver.get(config["base_url"])
+    def test_login_mainpage(self, driver, config):
+        driver.get(config["base_url"])
 
-    # Клик по кнопке "Войти в аккаунт" на главной
-    driver.find_element(By.XPATH, "//button[text()='Войти в аккаунт']").click()
-    perform_login(driver, config)
-    time.sleep(3)
+        driver.find_element(By.XPATH, "//button[text()='Войти в аккаунт']").click()
+        self.perform_login(driver, config)
 
+        # Ждем появления элемента, доступного только после входа
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//p[text()='Личный Кабинет']"))
+        )
+        assert driver.find_element(By.XPATH, "//p[text()='Личный Кабинет']").is_displayed()
 
-def test_login_mainpage_header(driver, config):
-    driver.get(config["base_url"])
+    def test_login_mainpage_header(self, driver, config):
+        driver.get(config["base_url"])
 
-    # Клик по кнопке "Личный Кабинет" на главной
-    driver.find_element(By.XPATH, "//a[@href='/account']").click()
-    perform_login(driver, config)
-    time.sleep(3)
+        driver.find_element(By.XPATH, "//a[@href='/account']").click()
+        self.perform_login(driver, config)
 
-def test_login_page_register(driver, config):
-    driver.get(config["base_url"])
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//p[text()='Личный Кабинет']"))
+        )
+        assert driver.find_element(By.XPATH, "//p[text()='Личный Кабинет']").is_displayed()
 
-    # Клик по кнопке "Личный Кабинет" на главной
-    driver.find_element(By.XPATH, "//a[@href='/account']").click()
-    # Клика по ссылке «Зарегистрироваться»
-    driver.find_element(By.XPATH, "//a[@href='/register']").click()
-    # Клика по ссылке «Войти»
-    driver.find_element(By.XPATH, "//a[@href='/login']").click()
-    perform_login(driver, config)
-    time.sleep(3)
+    def test_login_page_register(self, driver, config):
+        driver.get(config["base_url"])
 
-def test_login_forgot_password(driver, config):
-    driver.get(config["base_url"])
+        driver.find_element(By.XPATH, "//a[@href='/account']").click()
+        driver.find_element(By.XPATH, "//a[@href='/register']").click()
+        driver.find_element(By.XPATH, "//a[@href='/login']").click()
+        self.perform_login(driver, config)
 
-    # Клик по кнопке "Личный Кабинет" на главной
-    driver.find_element(By.XPATH, "//a[@href='/account']").click()
-    # Клика по ссылке «Восстановить пароль»
-    driver.find_element(By.XPATH, "//a[@href='/forgot-password']").click()
-    # Клика по ссылке «Войти»
-    driver.find_element(By.XPATH, "//a[@href='/login']").click()
-    perform_login(driver, config)
-    time.sleep(3)
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//p[text()='Личный Кабинет']"))
+        )
+        assert driver.find_element(By.XPATH, "//p[text()='Личный Кабинет']").is_displayed()
+
+    def test_login_forgot_password(self, driver, config):
+        driver.get(config["base_url"])
+
+        driver.find_element(By.XPATH, "//a[@href='/account']").click()
+        driver.find_element(By.XPATH, "//a[@href='/forgot-password']").click()
+        driver.find_element(By.XPATH, "//a[@href='/login']").click()
+        self.perform_login(driver, config)
+
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//p[text()='Личный Кабинет']"))
+        )
+        assert driver.find_element(By.XPATH, "//p[text()='Личный Кабинет']").is_displayed()

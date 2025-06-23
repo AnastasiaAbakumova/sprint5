@@ -1,55 +1,40 @@
-from selenium import webdriver
+import pytest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import time
 
-def test_registration():
-    driver = webdriver.Chrome()
-    driver.maximize_window()
-    driver.get("https://stellarburgers.nomoreparties.site/")
-    
-    try:
-        # 1. Клик на кнопку "Личный Кабинет"
-        account_button = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, "a[href='/account']"))
-        )
-        account_button.click()
-        
-        # 2. Клик на кнопку "Зарегистрироваться"
-        register_button = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.LINK_TEXT, "Зарегистрироваться"))
-        )
-        register_button.click()
-        
-        # 3. Ожидание загрузки формы регистрации
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, "//h2[contains(text(), 'Регистрация')]"))
-        )
-        
-        # 4. Заполнение формы (используем XPath по тексту лейблов)
-        name_field = driver.find_element(By.XPATH, "//label[contains(text(), 'Имя')]/following-sibling::input")
-        email_field = driver.find_element(By.XPATH, "//label[contains(text(), 'Email')]/following-sibling::input")
-        password_field = driver.find_element(By.XPATH, "//label[contains(text(), 'Пароль')]/following-sibling::input")
-        submit_button = driver.find_element(By.XPATH, "//button[contains(text(), 'Зарегистрироваться')]")
-        
-        # Ввод тестовых данных
-        name_field.send_keys("Анастасия")
-        email_field.send_keys("anastasiaabakumova25331@yandex.ru")
-        password_field.send_keys("@anAstas777")
-        time.sleep(1)
-        submit_button.click()
-        
-        # 5. Проверка успешной регистрации
-        WebDriverWait(driver, 10).until(
-            EC.url_contains("/login")
-        )
-        print("✅ Регистрация прошла успешно")
-        
-        
-    finally:
-        time.sleep(3)
-        driver.quit()
+class TestRegistration:
 
-if __name__ == "__main__":
-    test_registration()
+    @pytest.fixture(autouse=True)
+    def open_main(self, driver, config):
+        """Открываем главную до каждого теста этого класса."""
+        driver.get(config["base_url"])
+
+    def test_successful_registration(self, driver, config):
+        wait = WebDriverWait(driver, 10)
+
+        # 1) Нажимаем "Личный Кабинет"
+        wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "a[href='/account']"))).click()
+
+        # 2) Нажимаем "Зарегистрироваться"
+        wait.until(EC.element_to_be_clickable((By.LINK_TEXT, "Зарегистрироваться"))).click()
+
+        # 3) Убедимся, что форма регистрации загрузилась
+        wait.until(EC.visibility_of_element_located(
+            (By.XPATH, "//h2[contains(text(), 'Регистрация')]")
+        ))
+
+        # 4) Заполняем поля
+        driver.find_element(By.XPATH, "//label[contains(text(), 'Имя')]/following-sibling::input")\
+              .send_keys("Анастасия")
+        driver.find_element(By.XPATH, "//label[contains(text(), 'Email')]/following-sibling::input")\
+              .send_keys(config["username"])
+        driver.find_element(By.XPATH, "//label[contains(text(), 'Пароль')]/following-sibling::input")\
+              .send_keys(config["password"])
+
+        # 5) Сабмитим форму
+        driver.find_element(By.XPATH, "//button[contains(text(), 'Зарегистрироваться')]").click()
+
+        # 6) Проверяем, что после регистрации нас перебросило на страницу логина
+        assert wait.until(EC.url_contains("/login")), \
+            "Ожидалось, что после успешной регистрации URL будет содержать '/login'"

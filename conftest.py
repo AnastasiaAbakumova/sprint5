@@ -1,10 +1,11 @@
 import pytest
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-import pytest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from data.data import CREDENTIALS
+from locators.login_locators import LoginLocators
 
 @ pytest.fixture(scope="session")
 def config():
