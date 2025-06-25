@@ -21,3 +21,8 @@ def logged_in_driver(driver, config):
     """Залогиненный водитель."""
     login(driver, config)
     return driver
+
+@pytest.fixture(scope="function")
+def open_main(driver, config):
+    """Открываем главную перед каждым тестом."""
+    driver.get(config["base_url"])

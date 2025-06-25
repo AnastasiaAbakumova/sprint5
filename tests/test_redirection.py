@@ -1,5 +1,4 @@
 import pytest
-from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from locators.account_locators import AccountLocators
@@ -26,9 +25,7 @@ class TestAccountFlow:
         driver.find_element(*AccountLocators.ACCOUNT_LINK).click()
 
         # Ждём исчезновения оверлея (если он есть)
-        wait.until(EC.invisibility_of_element_located(
-            (By.CSS_SELECTOR, ".Modal_modal_overlay__x2ZCr")
-        ))
+        wait.until(EC.invisibility_of_element_located(AccountLocators.MODAL_OVERLAY))
 
         # Клик по "Конструктор"
         driver.find_element(*AccountLocators.CONSTRUCTOR_LINK).click()
@@ -48,9 +45,7 @@ class TestAccountFlow:
         driver.find_element(*AccountLocators.ACCOUNT_LINK).click()
 
         # Ждём кнопку "Выход" и кликаем
-        logout = wait.until(EC.element_to_be_clickable(
-            AccountLocators.LOGOUT_BUTTON
-        ))
+        logout = wait.until(EC.element_to_be_clickable(AccountLocators.LOGOUT_BUTTON))
         logout.click()
 
         # Ждём редирект на страницу логина

@@ -1,5 +1,4 @@
 import pytest
-from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from locators.login_locators import LoginLocators
@@ -10,9 +9,8 @@ class TestLogin:
 
     def test_login_mainpage(self, driver, config):
         """Тест входа через кнопку 'Войти в аккаунт' на главной странице."""
-        login(driver, config)  # используем общий хелпер
+        login(driver, config)
 
-        # Проверяем, что появилась ссылка "Личный Кабинет"
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located(LoginLocators.PROFILE_LINK)
         )
@@ -33,8 +31,8 @@ class TestLogin:
         """Тест входа через переход с регистрации."""
         driver.get(config["base_url"])
         driver.find_element(*LoginLocators.PROFILE_LINK).click()
-        driver.find_element(By.XPATH, "//a[@href='/register']").click()
-        driver.find_element(By.XPATH, "//a[@href='/login']").click()
+        driver.find_element(*LoginLocators.REGISTER_LINK).click()
+        driver.find_element(*LoginLocators.LOGIN_LINK).click()
 
         login(driver, config)
 
@@ -47,8 +45,8 @@ class TestLogin:
         """Тест входа через переход с восстановления пароля."""
         driver.get(config["base_url"])
         driver.find_element(*LoginLocators.PROFILE_LINK).click()
-        driver.find_element(By.XPATH, "//a[@href='/forgot-password']").click()
-        driver.find_element(By.XPATH, "//a[@href='/login']").click()
+        driver.find_element(*LoginLocators.FORGOT_PASSWORD_LINK).click()
+        driver.find_element(*LoginLocators.LOGIN_LINK).click()
 
         login(driver, config)
 
